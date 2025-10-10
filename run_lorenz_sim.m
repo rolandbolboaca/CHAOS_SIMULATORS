@@ -26,21 +26,32 @@ x_range = RANGE;
 y_range = RANGE;
 z_range = RANGE;
 
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % Generate data with stepwise rho values
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % plotHOSandHists(s, res);
 
 sims = 100;
-tspan = 1:0.05:500;
+tspan = 1:0.005:100;
 
 rho_range = [25 40 250];
+% rho_range = [150 150 150];
+% % Params: Increase-Decrease, Random shift rho
+% % ID: 20,30,40,30,20, etc.
+% % RS: 40, 20, 30, etc.
+% % ID and RS: more simulations and more rhos.
+% % false, true will generate random shifts
+% paramList = {
+%     true, true;
+%     true,  false;
+%     false, true;
+%     false, false
+% };
 
+RANDOM_LENGTH = true;
 paramList = {
-    true, true;
-    true,  false;
-    false, true;
-    false, false
+     false, true;
 };
 
 numRuns = size(paramList,1) * 2;   % 2 runs for each config
@@ -53,7 +64,7 @@ parfor k = 1:numRuns
 
     [s, res] = generateSimulations(sigma, beta, rho, tspan, xinit, noise, step_rho, ...
                                    sims, x_range, y_range, x_range, rho_range, ...
-                                   inc_dec, random_shuffle);
+                                   inc_dec, random_shuffle, RANDOM_LENGTH);
     results{k} = res;
 end
 
@@ -85,14 +96,19 @@ end
 % 18178, 9089 for inc dec
 % 16663 for not inc
 
+% [(max - min)/step] + 1
+% 0.005 = 19801 with 6 rho = ~ 
 save('lorenz_nonst.mat', '-v7.3'); 
 
 function [s, res] = generateSimulations(sigma, beta, rho, tspan, xinit, noise, step_rho, ...
                                         sims, x_range, y_range, z_range, rho_range, inc_dec, ...
-                                        random_shuffle)
+                                        random_shuffle, RANDOM_LENGTH)
 
     s = LorenzSystemSim(sigma, beta, rho, tspan, xinit, noise, step_rho);
-    res = s.run_extended_random_ic_rho_intervals_cont(sims, x_range, y_range, z_range, rho_range, inc_dec, random_shuffle);
+    res = s.run_extended_random_ic_rho_intervals_cont(sims, x_range, y_range, z_range, ... 
+                                                        rho_range, inc_dec, random_shuffle, ...
+                                                        RANDOM_LENGTH);
+    
     name = createName(noise, rho_range, inc_dec, x_range, sims, random_shuffle);
     s.writeToCSVFile(res, name);
 

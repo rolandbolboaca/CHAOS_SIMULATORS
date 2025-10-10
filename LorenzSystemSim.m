@@ -100,6 +100,7 @@ classdef LorenzSystemSim < handle
         step, temp_rho, rho_column = [];
         counter = 1;
         segment_lengths = 0;
+        RANDOM_LENGTH = false;
     end
     
     methods (Access = public)
@@ -237,7 +238,7 @@ classdef LorenzSystemSim < handle
         
         function out = run_extended_random_ic_rho_intervals_cont(obj, nr_sim, range_x, range_y,...
                                                                     range_z, rho_range, decreasing, ...
-                                                                    random_shuffle)
+                                                                    random_shuffle, RANDOM_LENGTH)
             j = 1; 
             
             if decreasing == true
@@ -250,7 +251,8 @@ classdef LorenzSystemSim < handle
 
             num_segments = length(obj.rho_values);
             obj.segment_lengths = int32(size(obj.tspan,2) / num_segments);
-            
+            obj.RANDOM_LENGTH = RANDOM_LENGTH;
+
             % obj.t_limits = linspace(obj.tspan(1), obj.tspan(end), num_segments);
             obj.t_limits = round(1 : obj.segment_lengths : size(obj.tspan,2));
             obj.t_limits = obj.tspan( obj.t_limits);
